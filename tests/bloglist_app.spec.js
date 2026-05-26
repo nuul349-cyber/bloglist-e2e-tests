@@ -54,5 +54,23 @@ describe('Blog app', () => {
 
       await expect(page.getByText('Test Note Title by TestAuthor')).toBeVisible()
     })
+
+    describe('With a note', () => {
+      beforeEach(async ({ page }) => {
+        await page.getByRole('button', { name:'New note' }).click()
+
+        await page.getByLabel('title').fill('Test Note Title')
+        await page.getByLabel('author').fill('TestAuthor')
+        await page.getByLabel('url').fill('TestURL.com')
+
+        await page.getByRole('button', { name:'send' }).click()
+      })
+
+      test('Note can be liked', async ({ page }) => {
+        await page.getByRole('button', { name:'view' }).click()
+        await page.getByRole('button', { name:'like' }).click()
+        await expect(page.getByText('Likes: 1')).toBeVisible()
+      })
+    })
   })
 })
