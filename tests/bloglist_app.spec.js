@@ -11,6 +11,13 @@ describe('Blog app', () => {
       }
     })
 
+    await request.post('/api/users/', {
+      data: {
+        name: 'Admin2',
+        username: 'admin2',
+        password: 'passw'
+      }
+    })
 
     await page.goto('/')
   })
@@ -79,6 +86,17 @@ describe('Blog app', () => {
         await page.getByRole('button', { name:'delete' }).click()
 
         await expect(page.getByText('Test Note Title succesfully deleted')).toBeVisible()
+      })
+
+      test('Can\'t delete blog if not the owner of the blog', async ({ page }) => {
+        await page.getByRole('button', { name: 'Log out' }).click()
+
+        await page.getByLabel('username').fill('admin2')
+        await page.getByLabel('password').fill('passw')
+        await page.getByRole('button', { name: 'login'}).click()
+
+        await page.getByRole('button', { name: 'view'}).click()
+        await expect(page.getByRole('button', { name:'delete' })).not.toBeVisible()
       })
     })
   })
