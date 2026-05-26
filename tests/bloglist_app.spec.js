@@ -1,5 +1,17 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
 
+const createBlog = async (content, page) => {
+  await page.getByRole('button', { name: 'New note'}).click()
+  await page.getByLabel('title').fill(content.title)
+  await page.getByLabel('author').fill(content.author)
+  await page.getByLabel('url').fill(content.url)
+
+  await page.getByRole('button', { name: 'send'}).click()
+
+  await page.getByText(`${content.title} by`).waitFor()
+
+}
+
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
     await request.post('/api/testing/reset')
@@ -97,6 +109,26 @@ describe('Blog app', () => {
 
         await page.getByRole('button', { name: 'view'}).click()
         await expect(page.getByRole('button', { name:'delete' })).not.toBeVisible()
+      })
+
+      test('Blogs are arranged by likes', async ({ page }) => {
+        await createBlog({
+          title: 'Title1',
+          author: 'Author 1',
+          url: 'url1.com'
+        }, page)
+
+        await createBlog({
+          title: 'Title2',
+          author: 'Author 2',
+          url: 'url2.com'
+        }, page)
+
+        await page.getByRole('button', { name: 'view' }).nth(1).click()
+        await page.getByRole('button', { name: 'like' }).click()
+
+        await page.getByText('Likes: 1').waitFor()
+        await expect(page.locator('.blogs > div').first()).toContainText('Title1')
       })
     })
   })
